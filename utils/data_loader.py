@@ -1,235 +1,126 @@
-"""Tensorbox Kaggle Dataset Loader & Ingestion Pipeline.
+"""Tensorbox Kaggle Dataset Loader.
 
-This module provides automated retrieval and caching of authentic Kaggle benchmark
-datasets. When Kaggle API credentials are present, datasets are downloaded directly
-via the Kaggle API / kagglehub. Otherwise, authentic dataset mirrors are fetched directly
-to the /workspace/data directory. No synthetic data is generated.
+Provides seamless loading of Kaggle datasets from structured local folders or files.
+Automatically resolves:
+  1. Kaggle Folder Structure: data/<dataset>/train.csv, data/<dataset>/test.csv, data/<dataset>/<custom>.csv
+  2. Direct CSV File: data/<dataset>.csv
+  3. /workspace/data/<dataset>/
 """
 
 import os
-import io
-import shutil
-import urllib.request
 from pathlib import Path
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union
 import pandas as pd
-
 from utils.logger import get_logger
-from utils.config import Config
 
 logger = get_logger("DataLoader")
 
-DATA_DIR = Path("/workspace/data") if Path("/workspace/data").exists() and os.access("/workspace", os.W_OK) else Path(__file__).parent.parent / "data"
-
 
 def get_data_dir() -> Path:
-    """Resolve the active dataset directory with fallbacks."""
+    """Resolve the active data directory."""
     candidates = [
         Path("/workspace/data"),
         Path(__file__).parent.parent / "data",
-        Path.cwd() / "data"
+        Path.cwd() / "data",
+        Path.cwd().parent / "data"
     ]
     for p in candidates:
-        if p.exists():
+        if p.exists() and p.is_dir():
             return p
-    target = Path("/workspace/data") if Path("/workspace").exists() and os.access("/workspace", os.W_OK) else Path.cwd() / "data"
-    target.mkdir(parents=True, exist_ok=True)
-    return target
+    default = Path("/workspace/data") if Path("/workspace").exists() and os.access("/workspace", os.W_OK) else Path.cwd() / "data"
+    default.mkdir(parents=True, exist_ok=True)
+    return default
 
 
-# Official Kaggle Dataset Registry and Authentic Mirrors
-KAGGLE_DATASET_REGISTRY: Dict[str, Dict[str, Any]] = {
-    "titanic": {
-        "kaggle_slug": "heptapod/titanic",
-        "kaggle_file": "train.csv",
-        "mirror_url": "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv",
-        "filename": "titanic.csv",
-        "description": "Kaggle Titanic Survival Classification Dataset (891 passengers)",
-        "file_type": "CSV"
-    },
-    "telecom_churn": {
-        "kaggle_slug": "blastchar/telco-customer-churn",
-        "kaggle_file": "WA_Fn-UseC_-Telco-Customer-Churn.csv",
-        "mirror_url": "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv",
-        "filename": "telecom_churn.csv",
-        "description": "Kaggle Telco Customer Churn Imbalanced Dataset (7,043 customers)",
-        "file_type": "CSV"
-    },
-    "customer_segmentation": {
-        "kaggle_slug": "vjchoudhary7/customer-segmentation-tutorial-in-python",
-        "kaggle_file": "Mall_Customers.csv",
-        "mirror_url": "https://raw.githubusercontent.com/tirthajyoti/Machine-Learning-with-Python/master/Datasets/Mall_Customers.csv",
-        "filename": "customer_segmentation.csv",
-        "description": "Kaggle Mall Customer Segmentation & Clustering Dataset (200 records)",
-        "file_type": "CSV"
-    },
-    "housing_prices": {
-        "kaggle_slug": "yasserh/housing-prices-dataset",
-        "kaggle_file": "Housing.csv",
-        "mirror_url": "https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv",
-        "filename": "housing_prices.csv",
-        "description": "Kaggle Housing Prices Regularized Regression Dataset",
-        "file_type": "CSV"
-    },
-    "stock_market": {
-        "kaggle_slug": "camnugent/sandp500",
-        "kaggle_file": "all_stocks_5yr.csv",
-        "mirror_url": "https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv",
-        "filename": "stock_market.csv",
-        "description": "Kaggle S&P 500 / Big Tech Stock Market Historical Time Series",
-        "file_type": "CSV"
-    },
-    "monthly_sales": {
-        "kaggle_slug": "aslanahmedov/walmart-dataset",
-        "kaggle_file": "monthly-car-sales.csv",
-        "mirror_url": "https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-car-sales.csv",
-        "filename": "monthly_sales.csv",
-        "description": "Kaggle Monthly Sales Econometric Time Series Forecasting Dataset",
-        "file_type": "CSV"
-    },
-    "news_articles": {
-        "kaggle_slug": "hgultekin/bbcnewsarchive",
-        "kaggle_file": "bbc-news-data.csv",
-        "mirror_url": "https://raw.githubusercontent.com/suraj-deshmukh/BBC-Dataset-News-Classification/master/dataset/bbc-text.csv",
-        "filename": "news_articles.csv",
-        "description": "Kaggle BBC News Topic Classification & NLP Dataset",
-        "file_type": "CSV"
-    },
-    "sentiment_dataset": {
-        "kaggle_slug": "crowdflower/twitter-airline-sentiment",
-        "kaggle_file": "Tweets.csv",
-        "mirror_url": "https://raw.githubusercontent.com/kolaveridi/kaggle-Twitter-US-Airline-Sentiment/master/Tweets.csv",
-        "filename": "sentiment_dataset.csv",
-        "description": "Kaggle Twitter US Airline Sentiment Analysis Dataset",
-        "file_type": "CSV"
-    },
-    "credit_fraud": {
-        "kaggle_slug": "mlg-ulb/creditcardfraud",
-        "kaggle_file": "creditcard.csv",
-        "mirror_url": "https://raw.githubusercontent.com/datasciencedojo/datasets/master/default%20of%20credit%20card%20clients.csv",
-        "filename": "credit_fraud.csv",
-        "description": "Kaggle Credit Card Fraud & Default Anomaly Detection Dataset",
-        "file_type": "CSV"
-    },
-    "bike_sharing": {
-        "kaggle_slug": "raghavbhandari/bike-sharing-demand-dataset",
-        "kaggle_file": "hour.csv",
-        "mirror_url": "https://raw.githubusercontent.com/christophM/interpretable-ml-book/master/data/bike.csv",
-        "filename": "bike_sharing.csv",
-        "description": "Kaggle Bike Sharing Demand Hourly Regression Dataset",
-        "file_type": "CSV"
-    },
-    "movie_ratings": {
-        "kaggle_slug": "rounakbanik/the-movies-dataset",
-        "kaggle_file": "ratings_small.csv",
-        "mirror_url": "https://raw.githubusercontent.com/zygmuntz/goodbooks-10k/master/ratings.csv",
-        "filename": "movie_ratings.csv",
-        "description": "Kaggle MovieLens Collaborative Filtering Matrix Dataset",
-        "file_type": "CSV"
-    },
-    "knowledge_base": {
-        "kaggle_slug": "",
-        "kaggle_file": "",
-        "mirror_url": "",
-        "filename": "knowledge_base.txt",
-        "description": "Knowledge Base Document Corpus for Hybrid RAG & Vector Search",
-        "file_type": "TXT"
-    },
-    "instruction_tuning": {
-        "kaggle_slug": "",
-        "kaggle_file": "",
-        "mirror_url": "",
-        "filename": "instruction_tuning.jsonl",
-        "description": "Instruction Tuning Dataset for LLM LoRA Fine-Tuning",
-        "file_type": "JSONL"
-    }
-}
+def load_dataset(
+    name: str,
+    split: str = "train",
+    filename: Optional[str] = None,
+    **read_csv_kwargs
+) -> Union[pd.DataFrame, Path]:
+    """Load a dataset from the local data folder or direct file.
 
+    Parameters
+    ----------
+    name : str
+        The dataset or folder name (e.g. "titanic", "housing_prices", "bike_sharing").
+    split : str
+        The partition to load if organized as a Kaggle folder ("train", "test", "gender_submission", etc.). Default is "train".
+    filename : Optional[str]
+        Specific file to load within the dataset directory (e.g. "hour.csv").
 
-def download_kaggle_dataset(name: str, target_path: Path) -> bool:
-    """Download authentic dataset from Kaggle API or authentic Kaggle mirror."""
-    meta = KAGGLE_DATASET_REGISTRY.get(name)
-    if not meta:
-        logger.error(f"Dataset {name} is not in Kaggle Dataset Registry.")
-        return False
-
-    slug = meta.get("kaggle_slug")
-    kaggle_user = os.environ.get("KAGGLE_USERNAME", Config.get("KAGGLE_USERNAME", ""))
-    kaggle_key = os.environ.get("KAGGLE_KEY", Config.get("KAGGLE_KEY", ""))
-
-    # 1. Try Kaggle API if credentials exist
-    if kaggle_user and kaggle_key and slug:
-        try:
-            os.environ["KAGGLE_USERNAME"] = kaggle_user
-            os.environ["KAGGLE_KEY"] = kaggle_key
-            logger.info(f"Downloading {name} from Kaggle ({slug}) via Kaggle API...")
-            import kagglehub
-            path = kagglehub.dataset_download(slug)
-            src_files = list(Path(path).glob("*.csv"))
-            if src_files:
-                shutil.copy(src_files[0], target_path)
-                logger.info(f"Successfully downloaded {name} from Kaggle to {target_path}")
-                return True
-        except Exception as e:
-            logger.warning(f"Kaggle API download encountered issue: {e}. Falling back to authentic mirror.")
-
-    # 2. Authentic Real Kaggle Dataset Mirror
-    mirror_url = meta.get("mirror_url")
-    if mirror_url:
-        logger.info(f"Fetching authentic Kaggle dataset for {name} from {mirror_url}...")
-        try:
-            req = urllib.request.Request(mirror_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                data = resp.read()
-                target_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(target_path, "wb") as f:
-                    f.write(data)
-                logger.info(f"Successfully saved authentic Kaggle dataset {name} to {target_path}")
-                return True
-        except Exception as e:
-            logger.error(f"Failed to download Kaggle dataset mirror for {name}: {e}")
-            return False
-
-    return False
-
-
-def load_dataset(name: str, force_download: bool = False) -> Union[pd.DataFrame, Path]:
-    """Load dataset from local data directory, automatically fetching authentic Kaggle data if absent."""
+    Returns
+    -------
+    pd.DataFrame or Path
+    """
     data_dir = get_data_dir()
     clean_name = name.lower().replace("-", "_").replace(".csv", "").replace(".txt", "").replace(".jsonl", "")
 
-    meta = KAGGLE_DATASET_REGISTRY.get(clean_name)
-    filename = meta["filename"] if meta else f"{clean_name}.csv"
-    file_path = data_dir / filename
+    # Check text / document corpuses
+    if clean_name == "knowledge_base":
+        for candidate in [data_dir / "knowledge_base.txt", data_dir / "knowledge_base.md"]:
+            if candidate.exists():
+                return candidate
+    if clean_name == "instruction_tuning":
+        candidate = data_dir / "instruction_tuning.jsonl"
+        if candidate.exists():
+            return candidate
 
-    # 1. Check local cache
-    if file_path.exists() and not force_download:
-        logger.info(f"Loading {clean_name} from local cache: {file_path}")
-        if file_path.suffix == ".csv":
-            return pd.read_csv(file_path)
-        return file_path
+    # 1. Check Dataset Subfolder (Kaggle directory layout: data/<name>/train.csv)
+    folder = data_dir / clean_name
+    if folder.is_dir():
+        # Priority A: exact requested filename
+        if filename and (folder / filename).exists():
+            target = folder / filename
+            logger.info(f"Loading {clean_name}/{filename} from {target}")
+            return pd.read_csv(target, **read_csv_kwargs)
+        
+        # Priority B: split name (train.csv, test.csv, etc.)
+        split_file = folder / f"{split}.csv"
+        if split_file.exists():
+            logger.info(f"Loading {clean_name} [{split}] from {split_file}")
+            return pd.read_csv(split_file, **read_csv_kwargs)
+            
+        # Priority C: any CSV inside folder
+        csv_files = list(folder.glob("*.csv"))
+        if csv_files:
+            logger.info(f"Loading {clean_name} from {csv_files[0]}")
+            return pd.read_csv(csv_files[0], **read_csv_kwargs)
 
-    # 2. Fetch authentic Kaggle dataset
-    if clean_name in KAGGLE_DATASET_REGISTRY:
-        success = download_kaggle_dataset(clean_name, file_path)
-        if success and file_path.exists():
-            if file_path.suffix == ".csv":
-                return pd.read_csv(file_path)
-            return file_path
+    # 2. Check Flat CSV File: data/<clean_name>.csv
+    flat_csv = data_dir / f"{clean_name}.csv"
+    if flat_csv.exists():
+        logger.info(f"Loading {clean_name} from {flat_csv}")
+        return pd.read_csv(flat_csv, **read_csv_kwargs)
 
-    raise FileNotFoundError(f"Kaggle dataset {clean_name} could not be located or downloaded at {file_path}.")
+    # 3. Not found: raise actionable informative error
+    err_msg = (
+        f"\n❌ Kaggle Dataset '{clean_name}' was not found.\n\n"
+        f"Expected location:\n"
+        f"  📁 {data_dir}/{clean_name}/train.csv (or {data_dir}/{clean_name}.csv)\n\n"
+        f"Instructions:\n"
+        f"  1. Download the dataset from Kaggle.\n"
+        f"  2. Place or unzip the files in '{data_dir}/{clean_name}/'.\n"
+        f"  3. Re-run your code — it will be automatically discovered and loaded!\n"
+    )
+    raise FileNotFoundError(err_msg)
 
 
 def list_available_datasets():
-    """List all registered authentic Kaggle datasets and their local cache availability."""
+    """List all currently discovered datasets in the data folder."""
     data_dir = get_data_dir()
-    print("\n" + "=" * 85)
-    print("TENSORBOX KAGGLE DATASET REPOSITORY")
-    print("=" * 85)
-    for name, meta in KAGGLE_DATASET_REGISTRY.items():
-        fname = meta["filename"]
-        exists = (data_dir / fname).exists()
-        status = "CACHED" if exists else "READY (Kaggle)"
-        slug = f"({meta["kaggle_slug"]})" if meta["kaggle_slug"] else ""
-        print(f" * {name:<22} [{meta["file_type"]:<5}] {status:<18} {slug:<40}")
-    print("=" * 85 + "\n")
+    print("\n======================================================================")
+    print("📂 TENSORBOX LOCAL DATASET REPOSITORY")
+    print("======================================================================")
+    
+    entries = sorted(list(data_dir.iterdir()))
+    for item in entries:
+        if item.name.startswith("."):
+            continue
+        if item.is_dir():
+            files = [f.name for f in item.iterdir() if not f.name.startswith(".")]
+            print(f" 📁 {item.name:<25} [Folder] Contains: {', '.join(files[:4])}")
+        elif item.is_file():
+            size_kb = item.stat().st_size / 1024
+            print(f" 📄 {item.name:<25} [File]   {size_kb:.1f} KB")
+    print("======================================================================\n")
