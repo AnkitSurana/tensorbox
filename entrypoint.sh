@@ -1,8 +1,20 @@
 #!/bin/bash
 set -e
 
-# 1. Ensure workspace directories exist
+# 1. Ensure workspace directories exist and seed from image if empty
 mkdir -p /workspace/projects /workspace/notebooks /workspace/data /workspace/models /workspace/logs
+
+if [ -d /opt/tensorbox/notebooks ] && [ -z "$(ls -A /workspace/notebooks 2>/dev/null)" ]; then
+    cp -r /opt/tensorbox/notebooks/* /workspace/notebooks/ 2>/dev/null || true
+fi
+
+if [ -d /opt/tensorbox/projects ] && [ -z "$(ls -A /workspace/projects 2>/dev/null)" ]; then
+    cp -r /opt/tensorbox/projects/* /workspace/projects/ 2>/dev/null || true
+fi
+
+if [ -d /opt/tensorbox/data ] && [ -z "$(ls -A /workspace/data 2>/dev/null)" ]; then
+    cp -r /opt/tensorbox/data/* /workspace/data/ 2>/dev/null || true
+fi
 
 # 2. Automatically create .env in /workspace if not present
 if [ ! -f /workspace/.env ]; then

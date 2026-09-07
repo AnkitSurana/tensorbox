@@ -42,9 +42,9 @@ datasets/*
 !datasets/.gitkeep
 models/*
 !models/.gitkeep
-projects/*
-!projects/.gitkeep
 notebooks/.ipynb_checkpoints/
+notebooks/models/
+
 
 *.csv
 *.xlsx

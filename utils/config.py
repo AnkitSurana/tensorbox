@@ -37,6 +37,15 @@ reload_config()
 
 
 class Config:
+    @classmethod
+    def get_api_key(cls, provider: str) -> str:
+        return os.getenv(f"{provider.upper()}_API_KEY", "")
+
+    @classmethod
+    def has_key(cls, provider: str) -> bool:
+        val = cls.get_api_key(provider)
+        return bool(val and not val.startswith("your-") and not val.startswith("sk-your-") and not val.startswith("hf_your-"))
+
     """Central configuration loader."""
 
     @classmethod
@@ -106,3 +115,6 @@ class Config:
             "cohere": bool(cohere and not cohere.startswith("your-")),
             "huggingface": bool(hf and not hf.startswith("hf_your-")),
         }
+
+# Singleton instance for convenience
+config = Config

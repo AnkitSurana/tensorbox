@@ -36,9 +36,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.7.1/en_core_web_md-3.7.1-py3-none-any.whl || \
     (python -m spacy download en_core_web_sm || true)
 
-# Bake tensorbox utilities, tests, and templates into /opt/tensorbox
+# Bake tensorbox utilities, curriculum notebooks, projects, tests, and data into /opt/tensorbox
 COPY utils /opt/tensorbox/utils
 COPY tests /opt/tensorbox/tests
+COPY notebooks /opt/tensorbox/notebooks
+COPY projects /opt/tensorbox/projects
+COPY data /opt/tensorbox/data
 COPY .env.example /opt/tensorbox/.env.example
 RUN ln -s /opt/tensorbox /opt/devbox
 ENV PYTHONPATH="/workspace:/opt/tensorbox:/opt/devbox"
