@@ -1,0 +1,45 @@
+# Git
+.git
+.gitignore
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials/
+
+# Data & Persistence
+*_data/
+chroma_data/
+qdrant_data/
+weaviate_data/
+milvus_data/
+postgres_data/
+mongodb_data/
+redis_data/
+data/
+datasets/
+models/
+
+# Python cache & tests
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentation & Markdown
+*.md

@@ -1,0 +1,83 @@
+# Environment & Secrets
+.env
+.env.local
+*.key
+*.pem
+secrets/
+credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments & Workspaces
+venv/
+env/
+ENV/
+.venv/
+workspace/
+tensorbox_workspace/
+aiml_workspace/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Data & Models (ignore contents but keep directory)
+data/*
+!data/.gitkeep
+datasets/*
+!datasets/.gitkeep
+models/*
+!models/.gitkeep
+projects/*
+!projects/.gitkeep
+notebooks/.ipynb_checkpoints/
+
+*.csv
+*.xlsx
+*.db
+*.sqlite
+chroma_data/
+qdrant_data/
+weaviate_data/
+milvus_data/
+postgres_data/
+mongodb_data/
+redis_data/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.jupyter/
+
+# Logs
+logs/
+*.log
+
+# Cache & Tests
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ML Tracking
+mlruns/
+wandb/
+lightning_logs/
+
+# OS
+.DS_Store
+Thumbs.db
