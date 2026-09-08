@@ -25,7 +25,7 @@ def test_directory_structure():
     expected_dirs = [
         "notebooks",
         "data",
-        "datasets",
+        
         "projects",
         "models",
         "utils",

@@ -1,235 +1,180 @@
-<div align="center">
+# Tensorbox: Modular Machine Learning & AI Engineering Workstation
 
-# 🚀 Tensorbox
-### An All-in-One, Zero-Setup Machine Learning & Generative AI Development Workstation
-
-[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg?logo=python&logoColor=white)](https://python.org)
-[![Docker](https://img.shields.io/badge/Docker-Container-2496ED.svg?logo=docker&logoColor=white)](https://docker.com)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.13+-FF6F00.svg?logo=tensorflow&logoColor=white)](https://tensorflow.org)
-[![LangChain](https://img.shields.io/badge/LangChain-Enabled-1C3C3C.svg)](https://langchain.com)
-[![FastAPI](https://img.shields.io/badge/FastAPI-OpenAPI-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-<p align="center">
-  <b>Instant in-browser VS Code, JupyterLab, 200+ AI/ML libraries, embedded vector databases, and OpenAPI tooling.</b><br>
-  <i>Users never have to install Python dependencies, configure CUDA, or manage port conflicts. Just run one Docker command and start coding!</i>
-</p>
-
-</div>
+Tensorbox is an all-in-one, zero-setup machine learning and artificial intelligence development workstation. It provides a structured, reproducible curriculum of **10 Progressive Learning Journeys** and **10 Production-Grade Engineering Projects** built on local Kaggle-standard datasets with sub-millisecond execution benchmarks.
 
 ---
 
-## 🌟 Instant Web Interfaces
+## 1. Architectural Overview & Workstation Capabilities
 
-Once launched, Tensorbox serves all tools through your local browser:
+```
+================================================================================
+                                TENSORBOX WORKSTATION
+================================================================================
+  [ Local Dataset Layer ]      --> 12 Kaggle-Standard Datasets (data/*)
+  [ Learning Journeys ]        --> 10 Step-by-Step Educational Notebooks (notebooks/*)
+  [ Production Projects ]      --> 10 Standalone Microservice Projects (projects/*)
+  [ Model Artifact Registry ]  --> Persistent Serialized Estimators (models/*)
+  [ Enterprise CLI & Utils ]   --> Dataset Ingestion, Vector DBs, Health Checks (utils/*)
+  [ Verification Suite ]       --> Full PyTest & Notebook Execution Engines (tests/*)
+================================================================================
+```
 
-| Interface | URL | Description |
-| :--- | :--- | :--- |
-| **💻 VS Code IDE** | **[http://localhost:8080](http://localhost:8080)** | Full in-browser VS Code with terminal, extensions, and Git GUI |
-| **📓 JupyterLab** | **[http://localhost:8888](http://localhost:8888)** | Computational notebooks for experiments and data science |
-| **⚡ FastAPI / OpenAPI** | **[http://localhost:5000/docs](http://localhost:5000/docs)** | Interactive Swagger UI for REST ML prediction APIs |
-| **📊 Streamlit** | **[http://localhost:8501](http://localhost:8501)** | Live interactive machine learning dashboards |
-| **📈 TensorBoard** | **[http://localhost:6006](http://localhost:6006)** | Real-time neural network training visualizations |
-
-## 📋 System Requirements & Hardware Matrix
-
-Before running Tensorbox, verify that your computer meets the hardware and operating system specifications:
-
-### 🖥️ Supported Processors & Operating Systems
-
-| Platform | Supported Chips & Processors | Supported OS Versions | Minimum RAM | Recommended RAM |
-| :--- | :--- | :--- | :--- | :--- |
-| **🍎 Apple Mac** | • **Apple Silicon:** M1, M2, M3, M4 (Base, Pro, Max, Ultra)<br>• **Intel Mac:** Core i5 / i7 / i9 (2018 or newer) | macOS 12 Monterey<br>macOS 13 Ventura<br>macOS 14 Sonoma<br>macOS 15 Sequoia | 8 GB Unified Memory | 16 GB+ Unified Memory |
-| **🪟 Windows** | • **Intel:** Core i5 / i7 / i9 (8th Gen or newer)<br>• **AMD:** Ryzen 5 / 7 / 9 (3000 series or newer)<br>• **ARM:** Snapdragon X Elite / Plus | Windows 10 (64-bit, 21H2+)<br>Windows 11 (Home / Pro) with WSL2 | 8 GB RAM | 16 GB+ RAM |
-| **🐧 Linux** | • Any 64-bit x86_64 CPU (Intel / AMD, 4+ cores)<br>• Any ARM64 CPU (Ampere, Raspberry Pi 5 8GB, AWS Graviton) | Ubuntu 20.04, 22.04, 24.04 LTS<br>Debian 11 / 12<br>Fedora 38+ / Arch Linux | 8 GB RAM | 16 GB+ RAM |
-
-### 💾 Storage & Virtualization Requirements
-* **Disk Storage:** 15 GB minimum free space (30 GB+ SSD recommended for saving models, datasets, and persistent vector databases).
-* **Virtualization:** Must be enabled in BIOS/UEFI (required by Docker Desktop and Windows WSL2).
-* **Software:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac) or Docker Engine (Linux).
-* **Browser:** Chrome, Firefox, Safari, Edge, or Brave.
-
-> [!NOTE]
-> **Windows Users:** Ensure **Virtualization** is enabled in your BIOS/UEFI and WSL2 is selected in Docker Desktop Settings (`Settings > General > Use the WSL 2 based engine`).
-
-### 💡 Do I Need an NVIDIA GPU?
-
-**No, an NVIDIA GPU is NOT required for most coursework:**
-
-* **95% of AI/ML Tasks Run 100% on CPU:**
-  * Classical machine learning (Scikit-learn, XGBoost, LightGBM, Pandas).
-  * Vector databases & semantic search (ChromaDB, FAISS, Qdrant).
-  * Neural text embeddings using models like `all-MiniLM-L6-v2` (runs in milliseconds on CPU).
-  * Generative AI & RAG pipelines connecting to OpenAI, Anthropic, Gemini, or Groq (inference runs in the cloud).
-  * Web APIs & UI dashboards (FastAPI, Streamlit, PostgreSQL, Redis).
-* **When is an NVIDIA GPU helpful?**
-  * Training deep neural networks (PyTorch/TensorFlow) from scratch on large image/video datasets.
-  * Fine-tuning large open-source language models locally (e.g., Llama 3 8B with LoRA).
-* **If you have an NVIDIA GPU:**
-  * On Linux / Windows WSL2 with the NVIDIA Container Toolkit installed, simply append `--gpus all` to your `docker run` command for automatic CUDA acceleration.
-* **If you do not have an NVIDIA GPU:**
-  * Develop and test your code locally in Tensorbox, then run heavy training scripts on free cloud GPU environments (Google Colab, Kaggle, or your university compute cluster).
+### Core Interfaces & Services
+- **JupyterLab Development**: Interactive exploratory data analysis, algorithm derivation, and model training.
+- **FastAPI / OpenAPI Microservices**: Production REST inference endpoints with automatic Swagger documentation.
+- **In-Memory Feature Stores & Vector DBs**: Sub-millisecond similarity retrieval (Qdrant / ChromaDB / TF-IDF).
+- **Persistent Model Artifact Registry**: Automated serialization of champion models into `models/` (.joblib and .pt).
 
 ---
 
-## 👨‍💻 For Users: 1-Command Launch (Zero Clone)
+## 2. Masterclass Learning Journeys (notebooks/)
 
-You do **not** need to clone this repository. Simply ensure [Docker Desktop](https://www.docker.com/products/docker-desktop) is running on your computer, then execute:
+The `notebooks/` directory contains 10 foundational, self-contained educational journeys designed with kid-friendly real-world analogies, step-by-step mathematical derivations, output breakdowns, and executive summaries:
 
-### 🍎 macOS / 🐧 Linux:
+| Journey | Module Title | Core Machine Learning Concepts | Artifact Output |
+| :--- | :--- | :--- | :--- |
+| **Journey 00** | Environment Setup & Ingestion | Environment validation, Kaggle schemas, Memory profiling | System certified |
+| **Journey 01** | Titanic Survival Classification | Gini Impurity, Decision Trees, Tree Depth Sweeps | `models/titanic_best_model.joblib` |
+| **Journey 02** | Housing Prices Regression | Ordinary Least Squares, Ridge (L2) vs Lasso (L1) | `models/housing_best_model.joblib` |
+| **Journey 03** | Telecom Churn Imbalance | Precision/Recall, Asymmetric Cost Functions | `models/telecom_churn_best_model.joblib` |
+| **Journey 04** | Bike Sharing Demand Forecasting | Cyclical Trigonometric Time (sin/cos), Ensembles | `models/bike_sharing_best_model.joblib` |
+| **Journey 05** | Credit Fraud Anomaly Detection | Isolation Forest Tree Path Lengths, PR-AUC | `models/credit_fraud_best_model.joblib` |
+| **Journey 06** | Customer Segmentation Clustering | Euclidean Distance, K-Means Elbow & Silhouette | `models/customer_segmentation_best_model.joblib` |
+| **Journey 07** | Stock Market Trading RL | Markov Decision Processes, Q-Learning, Bellman Math | `models/stock_market_best_model.joblib` |
+| **Journey 08** | NLP News & Sentiment | Tokenization, TF-IDF Vector Spaces, Cosine Similarity | `models/nlp_sentiment_best_model.joblib` |
+| **Journey 09** | Ecommerce Recommender Systems | Truncated SVD, PyTorch Neural Two-Tower Embeddings | `models/ecommerce_recommender_best_model.pt` |
+| **Journey 10** | GenAI, RAG & Tool Calling Agents | Semantic Chunking, Dynamic JSON Function Dispatch | `models/genai_agents_best_model.joblib` |
+
+---
+
+## 3. Production Engineering Projects (projects/)
+
+The `projects/` directory contains 10 complete enterprise projects. Each project contains an end-to-end Masterclass Notebook (`01_*_masterclass.ipynb`), standalone Python microservices (`app.py`, `service.py`), and dedicated PyTest verification suites (`test_*.py`):
+
+| Project | System Architecture | Mathematical & Engineering Focus | Production Files |
+| :--- | :--- | :--- | :--- |
+| **Project 01** | Enterprise Hybrid RAG Search Engine | BM25 Lexical + Dense Latent SVD + Reciprocal Rank Fusion ($k=60$) | `app.py`, `rag_engine.py`, `test_rag.py` |
+| **Project 02** | Realtime Fraud Detection & Feature Store | Streaming Amount Z-Score Velocity + Isolation Forest Anomaly Scoring | `feature_store.py`, `fraud_detector.py`, `test_fraud.py` |
+| **Project 03** | Autonomous Multi-Agent Market Analyst | Specialized Swarm (Technical, Valuation, Risk) with Deterministic Tools | `swarm.py`, `test_swarm.py` |
+| **Project 04** | Two-Tower Recommendation Engine | PyTorch Dual Embedding Towers (16-dim) with Sub-Millisecond Top-K MIPS | `model.py`, `test_two_tower.py` |
+| **Project 05** | Medical Image Segmentation & Grad-CAM | MRI Pathology Segmentation, Sørensen-Dice Metric, Grad-CAM Overlays | `unet.py`, `test_unet.py` |
+| **Project 06** | Continuous Training MLOps Pipeline | 2-Sample Kolmogorov-Smirnov Covariate Drift Detection & Retrain Loops | `pipeline.py`, `test_pipeline.py` |
+| **Project 07** | Multimodal Visual Search (CLIP) | Cross-Modal Normalized 32-dim Cosine Retrieval for Text-to-Image | `search_engine.py`, `test_multimodal.py` |
+| **Project 08** | LLM Fine-Tuning LoRA Serving Hub | Low-Rank Decomposition ($W_0 + BA$) with 99.2% VRAM Memory Savings | `lora_server.py`, `test_lora_hub.py` |
+| **Project 09** | Algorithmic Trading Reinforcement Learning | 3-State Regime MDP Q-Learning with Stop-Loss Risk Guardrails | `trading_env.py`, `test_trading.py` |
+| **Project 10** | Voice & Document AI Assistant | Spoken Intent Parsing + TF-IDF Semantic Passage Search Engine | `assistant.py`, `test_assistant.py` |
+
+---
+
+## 4. Local Dataset Catalog (data/)
+
+All datasets reside locally in clean, Kaggle-standard directories under `data/`:
+
+| Dataset Name | Domain | Files Included | Target / Primary Features |
+| :--- | :--- | :--- | :--- |
+| `titanic` | Passenger Demographics | `train.csv`, `test.csv` | `Survived` (Binary Classification) |
+| `housing_prices` | Residential Real Estate | `train.csv`, `test.csv` | `medv` (Median Property Value in $1k) |
+| `telecom_churn` | Subscription Billing | `train.csv` | `Churn` (Imbalanced Binary Target) |
+| `bike_sharing` | Urban Mobility Telemetry | `train.csv`, `test.csv` | `cnt` (Hourly Fleet Rental Demand) |
+| `credit_fraud` | Card Transactions | `train.csv` | `Class` (0.17% Rare Anomaly Flag) |
+| `customer_segmentation` | Mall Shopper Registry | `train.csv` | `Annual Income`, `Spending Score` |
+| `stock_market` | Daily Equity History | `train.csv` | `AAPL.Close`, Moving Averages |
+| `sentiment_dataset` | Customer Reviews | `train.csv` | `sentiment` (Positive vs Negative) |
+| `movie_ratings` | User-Item Interactions | `train.csv` | `rating` (1.0 to 5.0 Star Ratings) |
+| `news_articles` | Topic Documentation | `train.csv` | `text` (Unstructured News Corpus) |
+| `knowledge_base` | Technical Documentation | `data.txt` | Unstructured Enterprise Manuals |
+| `instruction_tuning` | LLM Fine-Tuning | `data.jsonl` | Instruction-Response JSONL Pairs |
+
+---
+
+## 5. Repository Directory Structure
+
+```
+tensorbox/
+├── data/                                 # 12 Kaggle-standard local datasets
+├── docs/                                 # Architecture diagrams and system specs
+├── models/                               # Serialized production model artifacts
+├── notebooks/                            # 10 Step-by-step masterclass journeys
+│   ├── 00_setup_and_data_ingestion.ipynb
+│   ├── 01_titanic_survival_journey/
+│   ├── 02_housing_prices_journey/
+│   ├── 03_telecom_churn_journey/
+│   ├── 04_bike_sharing_journey/
+│   ├── 05_credit_fraud_journey/
+│   ├── 06_customer_segmentation_journey/
+│   ├── 07_stock_market_trading_journey/
+│   ├── 08_nlp_news_and_sentiment_journey/
+│   ├── 09_ecommerce_recommender_journey/
+│   └── 10_genai_rag_and_agents_journey/
+├── projects/                             # 10 Production engineering projects
+│   ├── 01_enterprise_hybrid_rag_search_engine/
+│   ├── 02_realtime_fraud_detection_feature_store/
+│   ├── 03_autonomous_multi_agent_market_analyst/
+│   ├── 04_two_tower_ecommerce_recommendation_engine/
+│   ├── 05_medical_image_segmentation_gradcam/
+│   ├── 06_production_mlops_continuous_training/
+│   ├── 07_multimodal_visual_search_clip/
+│   ├── 08_llm_fine_tuning_lora_serving_hub/
+│   ├── 09_algorithmic_trading_reinforcement_learning/
+│   └── 10_voice_and_document_ai_assistant/
+├── scripts/                              # Automated testing and dependency checkers
+│   ├── check_dependencies.py
+│   └── test_all_notebooks.py
+├── tests/                                # Unit test suite for CLI and vector DBs
+├── utils/                                # Data loaders, loggers, vector DB helpers
+├── Dockerfile                            # Production container definition
+├── docker-compose.yml                    # Multi-container orchestration
+├── requirements.in                       # Top-level dependency specifications
+├── requirements.txt                      # Pinned production lockfile
+└── setup.py                              # Pip installable package setup
+```
+
+---
+
+## 6. Quickstart & Installation
+
+### Option A: Local Python Environment
 ```bash
-docker run -d \
-  --name tensorbox \
-  -p 8080:8080 \
-  -p 8888:8888 \
-  -p 8501:8501 \
-  -p 5000:5000 \
-  -p 6006:6006 \
-  -v "${PWD}/workspace:/workspace" \
-  tensorbox:latest
+# 1. Clone repository
+git clone https://github.com/ankitsurana/tensorbox.git
+cd tensorbox
+
+# 2. Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Verify system environment
+python scripts/check_dependencies.py
 ```
 
-### 🪟 Windows (PowerShell):
-```powershell
-docker run -d `
-  --name tensorbox `
-  -p 8080:8080 `
-  -p 8888:8888 `
-  -p 8501:8501 `
-  -p 5000:5000 `
-  -p 6006:6006 `
-  -v "${PWD}/workspace:/workspace" `
-  tensorbox:latest
-```
+### Option B: Docker Container
+```bash
+# Build and launch complete workstation
+docker-compose up -d --build
 
-> [!TIP]
-> Open **[http://localhost:8080](http://localhost:8080)** in your browser to immediately begin coding in VS Code!
+# Access JupyterLab at http://localhost:8888
+# Access FastAPI at http://localhost:5000/docs
+```
 
 ---
 
-## 🔑 In-Container Key Setup & CLI Tooling
+## 7. Testing & Verification Suite
 
-No private keys are passed in the `docker run` command. Configure API keys safely inside the VS Code terminal using the pre-installed `tensorbox` CLI (also aliased as `devbox`):
+Tensorbox includes a comprehensive automated testing suite:
 
 ```bash
-# Set your API keys directly into .env
-tensorbox set-key openai sk-proj-your-key-here
-tensorbox set-key anthropic sk-ant-your-key-here
-tensorbox set-key google your-gemini-key
+# Run unit test suite
+pytest tests/
 
-# Or launch the interactive configuration wizard:
-tensorbox config
-
-# Check live health of all services & API keys:
-tensorbox status
+# Execute all 21 masterclass notebooks end-to-end
+python scripts/test_all_notebooks.py
 ```
 
 ---
 
-## 🗄️ Self-Contained Databases & Services
+## 8. License
 
-All database engines are embedded directly in the Tensorbox container. Run single commands from the VS Code terminal to start and test them:
-
-```bash
-# 🐘 PostgreSQL: Automatically creates 'ml_database' on 127.0.0.1:5432
-tensorbox postgres
-
-# ⚡ Redis: Launches in-memory cache server on 127.0.0.1:6379
-tensorbox redis
-
-# 🚀 ChromaDB: Launches persistent vector store on 127.0.0.1:8000
-tensorbox chroma
-
-# 📁 Scaffold a new assignment project with starter files:
-tensorbox new assignment-1
-
-# ⚡ Launch FastAPI with interactive Swagger UI (:5000/docs):
-tensorbox fastapi projects/assignment-1/main.py
-
-# 📊 Launch Streamlit dashboard (:8501):
-tensorbox streamlit projects/assignment-1/app.py
-```
-
----
-
-## 🐙 User Git Submission Workflow
-
-Users can submit their **entire workspace** or an **individual assignment/project folder** to their personal GitHub account.
-
-### 🌟 Submit Entire Workspace (Recommended)
-Run `tensorbox git-init` to set up an automated, secure `.gitignore` that guarantees `.env` API keys, large datasets (`data/`), models (`models/`), and logs (`logs/`) are never pushed:
-
-```bash
-# 1. Initialize secure workspace (run inside VS Code terminal):
-tensorbox git-init
-
-# 2. Add your personal GitHub repo and push:
-git remote add origin https://github.com/<your-username>/<your-repo>.git
-git add .
-git commit -m "feat: submit coursework"
-git push -u origin main
-```
-
----
-
-## 📋 Host-Visible Logs & Diagnostics
-
-If you run into issues, all container logs are mirrored directly on your physical computer in `workspace/logs/`:
-* `workspace/logs/tensorbox.log`: Unified tool and script execution logs.
-* `workspace/logs/code-server.log`: VS Code server and extension logs.
-* `workspace/logs/jupyter.log`: JupyterLab notebook runtime logs.
-* `workspace/logs/system_info.log`: Container RAM, CPU architecture, and Python stats.
-
-> [!NOTE]
-> **Need help from a TA?** Run `tensorbox bug-report` inside the terminal to create a one-click `workspace/logs/tensorbox-diagnostics.zip` bundle ready to share!
-
----
-
-## 👨‍💻 For Instructors & Developers (Repository Maintainers)
-
-This repository is maintained by instructors to build, test, and release Docker images.
-
-### 🤖 Automated Dependency Solving
-To add/update packages without version conflicts:
-1. Edit [requirements.in](requirements.in) with flexible ranges.
-2. Run the automated SAT resolver:
-   ```bash
-   python scripts/resolve_dependencies.py
-   ```
-3. Run the automated conflict and smoke test:
-   ```bash
-   python scripts/check_dependencies.py
-   ```
-
-### 🚢 Building & Releasing
-```bash
-# Run test suite
-pytest tests
-
-# Build image locally
-docker build -t tensorbox:latest .
-
-# Release via git tag (triggers automated multi-arch GitHub Actions build):
-git tag v1.0.0 && git push origin v1.0.0
-```
-
----
-
-## 📚 Documentation Index
-
-All in-depth documentation is organized in the [`docs/`](docs/) directory:
-
-| Guide | Description |
-| :--- | :--- |
-| **[📖 User Guide](docs/USER_GUIDE.md)** | Step-by-step tutorial: starting, LLMs, OpenAPI, Streamlit, databases, and Git push. |
-| **[🛠️ Developer Guide](docs/DEVELOPER_GUIDE.md)** | Architecture, dependency solver, CI/CD pipeline, and release process. |
-| **[💻 Commands Reference](docs/COMMANDS.md)** | Comprehensive cheatsheet for host Docker and in-container `tensorbox` commands. |
-| **[📥 Installation & Troubleshooting](docs/INSTALL.md)** | OS-specific Docker setup steps and common troubleshooting fixes. |
-| **[🤝 Contributing Guide](docs/CONTRIBUTING.md)** | Guidelines for PR testing, code style, and test validation. |
-| **[🔒 Security Policy](docs/SECURITY.md)** | Credential isolation, `.env` safety, and vulnerability reporting. |
-
----
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This repository is licensed under the MIT License. See [LICENSE](LICENSE) for details.
