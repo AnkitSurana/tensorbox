@@ -20,7 +20,6 @@ milvus_data/
 postgres_data/
 mongodb_data/
 redis_data/
-data/
 datasets/
 models/
 
